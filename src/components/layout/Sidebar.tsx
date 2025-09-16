@@ -89,14 +89,14 @@ export default function Sidebar() {
           <div className="w-12 h-12 rounded-full flex items-center justify-center">
             {/* <span className="text-[#371959] text-lg font-bold">LLA</span> */}
             <img
-              src="/src/static/img/favicon.jpg"
+              src="/favicon.jpg"
               alt="Logo"
               className="h-20 object-cover rounded-full"
             />
           </div>
           <div>
             <h1 className="text-lg font-bold">La Libertad Avanza</h1>
-            <p className="text-sm opacity-75">Mango Soft</p>
+            <p className="text-sm opacity-75">Dashboard - v1.0b</p>
           </div>
         </div>
       </div>

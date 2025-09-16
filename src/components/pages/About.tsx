@@ -39,38 +39,20 @@ export default function About() {
       <div
         className={`rounded-lg p-6 border ${themeClasses.card} shadow-sm text-center`}
       >
-        <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-          {/* <span className="text-white text-4xl font-bold">MS</span> */}
+        <div className="w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6">
           <img
-            src="/src/static/img/MangoSoft.png"
+            src="/favicon.jpg"
             alt="Logo"
-            className="h-24 w-24"
+            className="h-32 w-32 rounded-full"
           />
         </div>
-        <h1 className="text-3xl font-bold mb-2">Mango Soft</h1>
+        <h1 className="text-3xl font-bold mb-2">Dashboard Contactos</h1>
         <p className="text-xl text-[#371959] font-semibold mb-2">
           Versión 1.0b
         </p>
         <p className={`${themeClasses.text} max-w-2xl mx-auto`}>
-          Plataforma de gestión de contactos para La Libertad Avanza.
+          Plataforma de gestión de contactos para La Libertad Avanza - Chaco.
         </p>
-      </div>
-
-      {/* Logo Section */}
-      <div className={`rounded-lg p-6 border ${themeClasses.card} shadow-sm`}>
-        <h2 className="text-xl font-bold mb-4 text-center">
-          La Libertad Avanza Chaco
-        </h2>
-        <div className="flex justify-center mb-4">
-          <div className="w-32 h-32 bg-[#371959] rounded-full flex items-center justify-center">
-            {/* <span className="text-white text-5xl font-bold">LLA</span> */}
-            <img
-              src="src/static/img/favicon.jpg"
-              alt="Logo"
-              className="h-32 w-32 rounded-full"
-            />
-          </div>
-        </div>
       </div>
 
       {/* Features Grid */}
@@ -255,6 +237,12 @@ export default function About() {
           </a>
         </div>
         <div className="mt-6 text-sm">
+          {/* Logo Mangosoft */}
+          <img
+            src="/MangoSoft.png"
+            alt="Mango Soft Logo"
+            className="h-10 w-auto mx-auto mb-2"
+          />
           <p className="font-medium">Mango Soft Development Team</p>
           <p className={themeClasses.text}>
             Sistema desarrollado para La Libertad Avanza de Chaco

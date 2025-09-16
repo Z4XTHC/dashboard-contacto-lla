@@ -36,25 +36,25 @@ export default function Home() {
   const stats = [
     {
       title: "Contactos Totales",
-      value: "1,234",
+      value: "1.234",
       icon: Users,
       color: "text-blue-600",
     },
     {
       title: "Mensajes Enviados",
-      value: "856",
+      value: "567",
       icon: MessageSquare,
       color: "text-green-600",
     },
     {
       title: "Usuarios Activos",
-      value: "12",
+      value: "89",
       icon: Shield,
       color: "text-purple-600",
     },
     {
       title: "Tasa de Respuesta",
-      value: "78%",
+      value: "100%",
       icon: BarChart3,
       color: "text-orange-600",
     },
