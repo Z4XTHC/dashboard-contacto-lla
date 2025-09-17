@@ -50,7 +50,7 @@ export default function WhatsAppModal({ isOpen, onClose, contact, onMessageSent 
   const handleSend = () => {
     const message = getCurrentMessage();
     const phoneNumber = contact.telefono.replace(/\D/g, ''); // Remove non-numeric characters
-    const whatsappUrl = `https://wa.me/+549${phoneNumber}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/549${phoneNumber}?text=${encodeURIComponent(message)}`;
     
     // Open WhatsApp
     window.open(whatsappUrl, '_blank');
