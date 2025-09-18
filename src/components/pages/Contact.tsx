@@ -10,6 +10,7 @@ import {
   Filter,
   RefreshCw,
   User,
+  MapPinned,
 } from "lucide-react";
 import { collection, doc, setDoc, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../config/firebase";
@@ -22,7 +23,15 @@ interface Contact {
   id: string;
   nombre: string;
   telefono: string;
+  telefono2: string;
   email: string;
+  localidad: string;
+  rol: string;
+  dni: string;
+  genero: string;
+  experiencia: string;
+  correoElectronico: string;
+  preferencias: string;
   estado: "Comunicado" | "Incomunicado";
   ultimoComunicacion?: string;
   comunicadoPor?: string;
@@ -40,32 +49,55 @@ export default function Contact() {
   const [showFilterWarningModal, setShowFilterWarningModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("Incomunicado");
+  const [locationFilter, setLocationFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   // Simular datos de Google Sheets
-  const mockContactsFromSheets = [
-    { nombre: "Juan Pérez", telefono: "1234567890", email: "juan@email.com" },
-    {
-      nombre: "Fabián Arriola",
-      telefono: "3624406355",
-      email: "example1@email.com",
-    },
-    {
-      nombre: "Christian Naidenoff",
-      telefono: "3624883675",
-      email: "example2@email.com",
-    },
-    {
-      nombre: "Alexander Gallardo",
-      telefono: "3624997707",
-      email: "example3@email.com",
-    },
-    {
-      nombre: "Joaquín Lavia",
-      telefono: "3624121192",
-      email: "example4@email.com",
-    },
-  ];
+  // const mockContactsFromSheets = [
+  //   { nombre: "Juan Pérez", telefono: "1234567890", email: "juan@email.com" },
+  //   {
+  //     nombre: "Fabián Arriola",
+  //     telefono: "3624406355",
+  //     email: "example1@email.com",
+  //   },
+  //   {
+  //     nombre: "Christian Naidenoff",
+  //     telefono: "3624883675",
+  //     email: "example2@email.com",
+  //   },
+  //   {
+  //     nombre: "Alexander Gallardo",
+  //     telefono: "3624997707",
+  //     email: "example3@email.com",
+  //   },
+  //   {
+  //     nombre: "Joaquín Lavia",
+  //     telefono: "3624121192",
+  //     email: "example4@email.com",
+  //   },
+  // ];
+
+  // Traer datos de Google Sheets
+  const contactsFromSheets = async () => {
+    // ▼▼▼ PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE APPS SCRIPT ▼▼▼
+    const appsScriptUrl =
+      "https://script.google.com/macros/s/AKfycbw62hvYFbONYig2qw8kclilRdvK3HKah0sg9-ACcWHRNh42FKxS-ZSFeGoo69gUy8r1ug/exec";
+
+    try {
+      const response = await fetch(appsScriptUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error(
+        "Error al traer los datos desde Google Apps Script:",
+        error
+      );
+      return [];
+    }
+  };
 
   useEffect(() => {
     speak("Página de contactos cargada");
@@ -74,11 +106,19 @@ export default function Contact() {
 
   useEffect(() => {
     filterContacts();
-  }, [contacts, searchTerm, statusFilter]);
+  }, [contacts, searchTerm, statusFilter, locationFilter]);
 
   const loadContacts = async () => {
+    setLoading(true);
     try {
-      const sheetsData = mockContactsFromSheets;
+      const sheetsData = await contactsFromSheets();
+
+      if (!Array.isArray(sheetsData)) {
+        console.error("Data from Google Sheets is not an array:", sheetsData);
+        setLoading(false);
+        return;
+      }
+
       const q = query(collection(db, "contact_status"));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const statusData: { [key: string]: any } = {};
@@ -86,14 +126,10 @@ export default function Contact() {
           statusData[doc.id] = doc.data();
         });
 
-        const combinedContacts: Contact[] = sheetsData.map((contact, index) => {
-          const id = `contact_${index}`;
-          const statusInfo = statusData[id];
+        const combinedContacts: Contact[] = sheetsData.map((contact) => {
+          const statusInfo = statusData[contact.id];
           return {
-            id,
-            nombre: contact.nombre,
-            telefono: contact.telefono,
-            email: contact.email,
+            ...contact,
             estado: statusInfo?.estado || "Incomunicado",
             ultimoComunicacion: statusInfo?.ultimoComunicacion,
             comunicadoPor: statusInfo?.comunicadoPor,
@@ -125,6 +161,12 @@ export default function Contact() {
 
     if (statusFilter !== "all") {
       filtered = filtered.filter((contact) => contact.estado === statusFilter);
+    }
+
+    if (locationFilter) {
+      filtered = filtered.filter(
+        (contact) => contact.localidad === locationFilter
+      );
     }
 
     setFilteredContacts(filtered);
@@ -244,6 +286,17 @@ export default function Contact() {
           Datos sincronizados desde Google Sheets. Estados actualizados en
           tiempo real desde Firebase.
         </p>
+
+        {/* Sync Button */}
+        <div className="mt-4 flex justify-end">
+          <Button
+            onClick={loadContacts}
+            className="flex items-center justify-center md:w-96"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Sincronizar
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -273,13 +326,22 @@ export default function Contact() {
             </select>
           </div>
 
-          <Button
-            onClick={loadContacts}
-            className="flex items-center justify-center"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Sincronizar
-          </Button>
+          {/* Filtro de Localidad */}
+          <div className="flex items-center space-x-2">
+            <MapPinned className="w-5 h-5 text-gray-400" />
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#371959] focus:border-[#371959]"
+            >
+              <option value="">Todas las localidades</option>
+              {[...new Set(contacts.map((c) => c.localidad))].map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -292,13 +354,13 @@ export default function Contact() {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
+                  Nombre y Apellido
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Teléfono
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  Localidad
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -331,8 +393,8 @@ export default function Contact() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                      {contact.email}
+                      <MapPinned className="w-4 h-4 mr-2 text-gray-400" />
+                      {contact.localidad}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -371,7 +433,7 @@ export default function Contact() {
                       className="bg-green-600 hover:bg-green-700 text-white"
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
-                      WhatsApp
+                      Comunicar
                     </Button>
                   </td>
                 </tr>
