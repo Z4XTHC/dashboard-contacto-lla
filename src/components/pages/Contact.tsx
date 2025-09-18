@@ -151,12 +151,18 @@ export default function Contact() {
     let filtered = contacts;
 
     if (searchTerm) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contact.telefono.includes(searchTerm) ||
-          contact.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const lowercasedSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter((contact) => {
+        const nombreMatch =
+          contact.nombre &&
+          contact.nombre.toLowerCase().includes(lowercasedSearchTerm);
+        const telefonoMatch =
+          contact.telefono && String(contact.telefono).includes(searchTerm);
+        const emailMatch =
+          contact.email &&
+          contact.email.toLowerCase().includes(lowercasedSearchTerm);
+        return nombreMatch || telefonoMatch || emailMatch;
+      });
     }
 
     if (statusFilter !== "all") {
@@ -299,9 +305,10 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filtros */}
       <div className={`rounded-lg p-4 border ${themeClasses.card} shadow-sm`}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Buscar contacto */}
           <div className="flex items-center space-x-2">
             <Search className="w-5 h-5 text-gray-400" />
             <Input
@@ -313,6 +320,7 @@ export default function Contact() {
             />
           </div>
 
+          {/* Filtro de Estado */}{}
           <div className="flex items-center space-x-2">
             <Filter className="w-5 h-5 text-gray-400" />
             <select

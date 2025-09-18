@@ -48,7 +48,7 @@ export default function About() {
         </div>
         <h1 className="text-3xl font-bold mb-2">Dashboard Contactos</h1>
         <p className="text-xl text-[#371959] font-semibold mb-2">
-          Versión 1.0b
+          Versión 2.0b
         </p>
         <p className={`${themeClasses.text} max-w-2xl mx-auto`}>
           Plataforma de gestión de contactos para La Libertad Avanza - Chaco.

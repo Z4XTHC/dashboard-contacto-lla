@@ -96,7 +96,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold">La Libertad Avanza</h1>
-            <p className="text-sm opacity-75">Dashboard - v1.0b</p>
+            <p className="text-sm opacity-75">Dashboard - v2.0b</p>
           </div>
         </div>
       </div>

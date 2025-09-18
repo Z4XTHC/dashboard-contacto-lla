@@ -1,15 +1,149 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAccessibility } from "../../contexts/AccessibilityContext";
 import { useTheme } from "../../contexts/ThemeContext";
-import { BarChart3, Users, MessageSquare, Shield } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  MessageSquare,
+  Shield,
+  RefreshCw,
+} from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../config/firebase";
 
 export default function Home() {
   const { speak } = useAccessibility();
   const { theme } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState([
+    {
+      title: "Contactos Totales",
+      value: "...",
+      icon: Users,
+      color: "text-blue-600",
+    },
+    {
+      title: "Mensajes Enviados",
+      value: "...",
+      icon: MessageSquare,
+      color: "text-green-600",
+    },
+    {
+      title: "Usuarios Activos",
+      value: "...",
+      icon: Shield,
+      color: "text-purple-600",
+    },
+    {
+      title: "Tasa de Respuesta",
+      value: "...",
+      icon: BarChart3,
+      color: "text-orange-600",
+    },
+  ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     speak("Página de inicio cargada");
+    loadStats();
   }, [speak]);
+
+  const contactsFromSheets = async () => {
+    const appsScriptUrl =
+      "https://script.google.com/macros/s/AKfycbw62hvYFbONYig2qw8kclilRdvK3HKah0sg9-ACcWHRNh42FKxS-ZSFeGoo69gUy8r1ug/exec";
+    try {
+      const response = await fetch(appsScriptUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching data from Google Apps Script:", error);
+      return [];
+    }
+  };
+
+  const loadStats = async () => {
+    setLoading(true);
+    try {
+      // Set up promises for all data fetching
+      const usersPromise = getDocs(collection(db, "users"));
+      const sheetsPromise = contactsFromSheets();
+      const statusesPromise = getDocs(collection(db, "contact_status"));
+
+      // Fetch all data in parallel
+      const [usersSnapshot, sheetsData, statusesSnapshot] = await Promise.all([
+        usersPromise,
+        sheetsPromise,
+        statusesPromise,
+      ]);
+
+      // --- Process Data ---
+
+      // 1. Active Users
+      const activeUsers = usersSnapshot.size;
+
+      // 2. Total Contacts
+      if (!Array.isArray(sheetsData)) {
+        console.error("Data from Google Sheets is not an array:", sheetsData);
+        throw new Error("Sheet data is not an array.");
+      }
+      const totalContacts = sheetsData.length;
+
+      // 3. Sent Messages
+      const statusData: { [key: string]: any } = {};
+      statusesSnapshot.forEach((doc) => {
+        statusData[doc.id] = doc.data();
+      });
+
+      const combinedContacts = sheetsData.map((contact: any) => ({
+        ...contact,
+        estado: statusData[contact.id]?.estado || "Incomunicado",
+      }));
+
+      const sentMessages = combinedContacts.filter(
+        (c: { estado: string }) => c.estado === "Comunicado"
+      ).length;
+
+      // 4. Response Rate
+      const responseRate =
+        totalContacts > 0
+          ? ((sentMessages / totalContacts) * 100).toFixed(0)
+          : 0;
+
+      // --- Update State ---
+      setStats([
+        {
+          title: "Contactos Totales",
+          value: totalContacts.toString(),
+          icon: Users,
+          color: "text-blue-600",
+        },
+        {
+          title: "Mensajes Enviados",
+          value: sentMessages.toString(),
+          icon: MessageSquare,
+          color: "text-green-600",
+        },
+        {
+          title: "Usuarios Activos",
+          value: activeUsers.toString(),
+          icon: Shield,
+          color: "text-purple-600",
+        },
+        {
+          title: "Tasa de Respuesta",
+          value: `${responseRate}%`,
+          icon: BarChart3,
+          color: "text-orange-600",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error loading stats:", error);
+      // You might want to set an error state here to show in the UI
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getThemeClasses = () => {
     switch (theme) {
@@ -33,32 +167,14 @@ export default function Home() {
 
   const themeClasses = getThemeClasses();
 
-  const stats = [
-    {
-      title: "Contactos Totales",
-      value: "1.234",
-      icon: Users,
-      color: "text-blue-600",
-    },
-    {
-      title: "Mensajes Enviados",
-      value: "567",
-      icon: MessageSquare,
-      color: "text-green-600",
-    },
-    {
-      title: "Usuarios Activos",
-      value: "89",
-      icon: Shield,
-      color: "text-purple-600",
-    },
-    {
-      title: "Tasa de Respuesta",
-      value: "100%",
-      icon: BarChart3,
-      color: "text-orange-600",
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-8 h-8 animate-spin text-[#371959]" />
+        <span className="ml-3 text-lg">Cargando estadísticas...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -71,6 +187,7 @@ export default function Home() {
           Sistema integral de gestión de contactos para La Libertad Avanza
           Chaco. Esta plataforma te permite administrar contactos, enviar
           mensajes por WhatsApp y mantener un seguimiento eficiente de las
+
           comunicaciones.
         </p>
       </div>

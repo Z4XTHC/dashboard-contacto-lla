@@ -37,7 +37,7 @@ export default function Login() {
           <div className="w-20 h-20 bg-[#371959] rounded-full flex items-center justify-center mx-auto mb-4">
             {/* <span className="text-white text-2xl font-bold">LLA</span> */}
             <img
-              src="/public/favicon.jpg"
+              src="./public/favicon.jpg"
               alt="Logo"
               className="h-20 object-cover rounded-full"
             />
@@ -45,7 +45,7 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-gray-900">
             La Libertad Avanza - Chaco
           </h1>
-          <p className="text-gray-600 mt-2">Dashboard Contactos - v1.0b</p>
+          <p className="text-gray-600 mt-2">Dashboard - v2.0b</p>
         </div>
 
         {/* Form */}
