@@ -75,7 +75,7 @@ export default function WhatsAppModal({
 
   const handleSend = () => {
     const message = getCurrentMessage();
-    const phoneNumber = contact.telefono.replace(/\D/g, ""); // Remove non-numeric characters
+    const phoneNumber = String(contact.telefono).replace(/\D/g, ""); // Remove non-numeric characters
     const whatsappUrl = `https://wa.me/549${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
